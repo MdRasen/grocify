@@ -1,6 +1,7 @@
 import { useSignUp } from "@clerk/expo";
 import { type Href, Link, useRouter } from "expo-router";
 import React, { useState } from "react";
+import { SocialAuthButtons } from "../../components/SocialAuthButtons";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -334,6 +335,19 @@ export default function SignUpScreen() {
           ) : (
             /* Sign Up View */
             <View style={styles.formCard}>
+              {/* Social Logins */}
+              <SocialAuthButtons
+                mode="sign-up"
+                onError={(msg) => setClientErrors({ general: msg })}
+                disabled={isSubmitting}
+              />
+
+              <View style={styles.dividerRow}>
+                <View style={styles.dividerLine} />
+                <Text style={styles.dividerText}>or continue with email</Text>
+                <View style={styles.dividerLine} />
+              </View>
+
               {/* Email */}
               <View style={styles.fieldGroup}>
                 <Text style={styles.label}>Email Address</Text>
@@ -637,6 +651,22 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     fontSize: 16,
     fontWeight: "700",
+  },
+  dividerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 4,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "#e5e7eb",
+  },
+  dividerText: {
+    paddingHorizontal: 12,
+    fontSize: 13,
+    color: "#9ca3af",
+    fontWeight: "500",
   },
   buttonLoadingContent: {
     flexDirection: "row",

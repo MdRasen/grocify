@@ -1,6 +1,8 @@
 import { useAuth, useUser } from "@clerk/expo";
+import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { type Href, Link } from "expo-router";
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   ActivityIndicator,
   StyleSheet,
@@ -44,19 +46,25 @@ export default function HomeScreen() {
               <Text style={styles.brandEmoji}>🛒</Text>
             </View>
             <Text style={styles.brandTitle}>Grocify</Text>
-            <Text style={styles.subtitle}>Welcome to Grocify</Text>
+            <Text style={styles.subtitle}>Fresh Groceries Delivered Fast</Text>
           </View>
 
           <View style={styles.buttonGroup}>
             <Link href={"/sign-in" as Href} asChild>
-              <TouchableOpacity style={styles.primaryButton} activeOpacity={0.8}>
+              <TouchableOpacity
+                style={styles.primaryButton}
+                activeOpacity={0.8}
+              >
                 <Text style={styles.primaryButtonText}>Log In</Text>
               </TouchableOpacity>
             </Link>
 
             <Link href={"/sign-up" as Href} asChild>
-              <TouchableOpacity style={styles.secondaryButton} activeOpacity={0.8}>
-                <Text style={styles.secondaryButtonText}>Sign Up</Text>
+              <TouchableOpacity
+                style={styles.secondaryButton}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.secondaryButtonText}>Create Account</Text>
               </TouchableOpacity>
             </Link>
           </View>
@@ -65,11 +73,19 @@ export default function HomeScreen() {
     );
   }
 
-  // 2. Signed in: Clean user state & Sign Out
+  // 2. Signed in: Clean user state & Profile navigation
   const primaryEmail =
     user?.primaryEmailAddress?.emailAddress ||
     user?.emailAddresses?.[0]?.emailAddress ||
     "Signed In User";
+
+  const displayName =
+    user?.fullName || user?.firstName || primaryEmail.split("@")[0] || "Shopper";
+
+  const userInitials =
+    ((user?.firstName?.[0] ?? "") + (user?.lastName?.[0] ?? "")).toUpperCase() ||
+    primaryEmail.charAt(0).toUpperCase() ||
+    "U";
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -82,10 +98,45 @@ export default function HomeScreen() {
           <Text style={styles.statusBadge}>Active Account</Text>
         </View>
 
+        {/* User Greeting & Avatar Card */}
         <View style={styles.card}>
-          <Text style={styles.cardLabel}>Signed in as</Text>
-          <Text style={styles.userEmail}>{primaryEmail}</Text>
-          {user?.id && <Text style={styles.userId}>ID: {user.id}</Text>}
+          <View style={styles.userHeader}>
+            <View style={styles.avatarWrapper}>
+              {user?.imageUrl ? (
+                <Image
+                  source={{ uri: user.imageUrl }}
+                  style={styles.avatarImage}
+                  contentFit="cover"
+                  transition={200}
+                />
+              ) : (
+                <View style={styles.avatarFallback}>
+                  <Text style={styles.avatarInitials}>{userInitials}</Text>
+                </View>
+              )}
+            </View>
+            <View style={styles.userInfo}>
+              <Text style={styles.greetingText}>Welcome back,</Text>
+              <Text style={styles.userNameText} numberOfLines={1}>
+                {displayName}
+              </Text>
+              <Text style={styles.userEmail} numberOfLines={1}>
+                {primaryEmail}
+              </Text>
+            </View>
+          </View>
+
+          <View style={styles.cardDivider} />
+
+          <Link href={"/profile" as Href} asChild>
+            <TouchableOpacity style={styles.profileNavButton} activeOpacity={0.8}>
+              <View style={styles.profileNavLeft}>
+                <Ionicons name="person-circle-outline" size={22} color="#16a34a" />
+                <Text style={styles.profileNavText}>My Profile & Settings</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color="#9ca3af" />
+            </TouchableOpacity>
+          </Link>
         </View>
 
         <TouchableOpacity
@@ -195,7 +246,7 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: "#ffffff",
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 20,
     marginBottom: 24,
     shadowColor: "#000",
@@ -203,17 +254,83 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 2,
+    gap: 16,
+  },
+  userHeader: {
+    flexDirection: "row",
     alignItems: "center",
+    gap: 16,
+  },
+  avatarWrapper: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    overflow: "hidden",
+    backgroundColor: "#dcfce7",
+    borderWidth: 2,
+    borderColor: "#16a34a",
+  },
+  avatarImage: {
+    width: "100%",
+    height: "100%",
+  },
+  avatarFallback: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  avatarInitials: {
+    fontSize: 22,
+    fontWeight: "800",
+    color: "#16a34a",
+  },
+  userInfo: {
+    flex: 1,
+  },
+  greetingText: {
+    fontSize: 13,
+    color: "#6b7280",
+    fontWeight: "500",
+  },
+  userNameText: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#111827",
+  },
+  userEmail: {
+    fontSize: 13,
+    color: "#9ca3af",
+    marginTop: 2,
+  },
+  cardDivider: {
+    height: 1,
+    backgroundColor: "#f3f4f6",
+  },
+  profileNavButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#f9fafb",
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+  },
+  profileNavLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  profileNavText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#1f2937",
   },
   cardLabel: {
     fontSize: 13,
     color: "#6b7280",
     marginBottom: 4,
-  },
-  userEmail: {
-    fontSize: 17,
-    fontWeight: "700",
-    color: "#111827",
   },
   userId: {
     fontSize: 12,

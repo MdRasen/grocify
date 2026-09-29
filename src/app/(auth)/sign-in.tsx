@@ -1,6 +1,7 @@
 import { useSignIn } from "@clerk/expo";
 import { type Href, Link, useRouter } from "expo-router";
-import React, { useState } from "react";
+import { useState } from "react";
+import { SocialAuthButtons } from "../../components/SocialAuthButtons";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -118,7 +119,9 @@ export default function SignInScreen() {
               <Text style={styles.brandEmoji}>🛒</Text>
             </View>
             <Text style={styles.brandTitle}>Grocify</Text>
-            <Text style={styles.subtitle}>Welcome back! Log in to continue</Text>
+            <Text style={styles.subtitle}>
+              Welcome back! Log in to continue
+            </Text>
           </View>
 
           {/* General Error Banner */}
@@ -130,6 +133,19 @@ export default function SignInScreen() {
 
           {/* Form */}
           <View style={styles.formCard}>
+            {/* Social Logins */}
+            <SocialAuthButtons
+              mode="sign-in"
+              onError={(msg) => setClientErrors({ general: msg })}
+              disabled={isSubmitting}
+            />
+
+            <View style={styles.dividerRow}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>or continue with email</Text>
+              <View style={styles.dividerLine} />
+            </View>
+
             {/* Email Field */}
             <View style={styles.fieldGroup}>
               <Text style={styles.label}>Email Address</Text>
@@ -158,7 +174,14 @@ export default function SignInScreen() {
 
             {/* Password Field */}
             <View style={styles.fieldGroup}>
-              <Text style={styles.label}>Password</Text>
+              <View style={styles.labelRow}>
+                <Text style={styles.label}>Password</Text>
+                <Link href={"/reset-password" as Href} asChild>
+                  <Pressable hitSlop={6}>
+                    <Text style={styles.forgotPasswordText}>Forgot password?</Text>
+                  </Pressable>
+                </Link>
+              </View>
               <View style={styles.passwordContainer}>
                 <TextInput
                   style={[
@@ -218,7 +241,7 @@ export default function SignInScreen() {
 
           {/* Switch to Sign Up */}
           <View style={styles.footer}>
-            <Text style={styles.footerText}>Don't have an account? </Text>
+            <Text style={styles.footerText}>{"Don't have an account? "}</Text>
             <Link href={"/sign-up" as Href} asChild>
               <Pressable hitSlop={8}>
                 <Text style={styles.footerLink}>Create account / Sign up</Text>
@@ -370,6 +393,32 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     fontSize: 16,
     fontWeight: "700",
+  },
+  dividerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 4,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "#e5e7eb",
+  },
+  dividerText: {
+    paddingHorizontal: 12,
+    fontSize: 13,
+    color: "#9ca3af",
+    fontWeight: "500",
+  },
+  labelRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  forgotPasswordText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#16a34a",
   },
   buttonLoadingContent: {
     flexDirection: "row",

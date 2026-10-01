@@ -62,7 +62,7 @@ export function SocialAuthButtons({
         if (setActive) {
           await setActive({ session: createdSessionId });
         }
-        router.replace("/(tabs)/index");
+        router.replace("/(tabs)");
       } else if (
         authSessionResult?.type === "cancel" ||
         authSessionResult?.type === "dismiss"

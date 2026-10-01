@@ -9,3 +9,7 @@ export const groceryItems = pgTable("grocery_items", {
   priority: text("priority").notNull().default("medium"),
   updated_at: bigint("updated_at", { mode: "number" }).notNull(),
 });
+
+export type GroceryItem = typeof groceryItems.$inferSelect;
+export type NewGroceryItem = typeof groceryItems.$inferInsert;
+

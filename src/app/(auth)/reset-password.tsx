@@ -163,7 +163,7 @@ export default function ResetPasswordScreen() {
       if (signIn.status === "complete") {
         await signIn.finalize({
           navigate: () => {
-            router.replace("/(tabs)/index");
+            router.replace("/(tabs)");
           },
         });
       } else {

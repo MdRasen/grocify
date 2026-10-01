@@ -1,7 +1,6 @@
 import { useSignIn } from "@clerk/expo";
 import { type Href, Link, useRouter } from "expo-router";
 import { useState } from "react";
-import { SocialAuthButtons } from "../../components/SocialAuthButtons";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -15,6 +14,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { SocialAuthButtons } from "../../components/SocialAuthButtons";
 
 export default function SignInScreen() {
   const { signIn, errors, fetchStatus } = useSignIn();
@@ -178,7 +178,9 @@ export default function SignInScreen() {
                 <Text style={styles.label}>Password</Text>
                 <Link href={"/reset-password" as Href} asChild>
                   <Pressable hitSlop={6}>
-                    <Text style={styles.forgotPasswordText}>Forgot password?</Text>
+                    <Text style={styles.forgotPasswordText}>
+                      Forgot password?
+                    </Text>
                   </Pressable>
                 </Link>
               </View>

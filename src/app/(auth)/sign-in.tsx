@@ -69,7 +69,7 @@ export default function SignInScreen() {
       if (signIn.status === "complete") {
         await signIn.finalize({
           navigate: () => {
-            router.replace("/");
+            router.replace("/(tabs)/index");
           },
         });
       } else {

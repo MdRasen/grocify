@@ -11,7 +11,7 @@ export default function SSOCallbackScreen() {
   useEffect(() => {
     if (isLoaded) {
       if (isSignedIn) {
-        router.replace("/");
+        router.replace("/(tabs)/index");
       } else {
         router.replace("/sign-in");
       }

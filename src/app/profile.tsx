@@ -25,7 +25,7 @@ export default function ProfileScreen() {
   if (!isAuthLoaded || !isUserLoaded) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#16a34a" />
+        <ActivityIndicator size="large" color="#059669" />
       </View>
     );
   }
@@ -34,6 +34,9 @@ export default function ProfileScreen() {
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.notSignedInContainer}>
+          <View style={styles.warningIconCircle}>
+            <Ionicons name="lock-closed" size={32} color="#dc2626" />
+          </View>
           <Text style={styles.notSignedInTitle}>Session Expired</Text>
           <Text style={styles.notSignedInSubtitle}>
             Please sign in to access your profile settings.
@@ -88,6 +91,7 @@ function ProfileContent({
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const [passwordSuccessMessage, setPasswordSuccessMessage] = useState<
     string | null
@@ -189,7 +193,7 @@ function ProfileContent({
         lastName: lastName.trim(),
       });
       await user.reload();
-      setNameSuccessMessage("Your name was updated successfully!");
+      setNameSuccessMessage("Your profile name has been updated!");
     } catch (err: unknown) {
       console.error("Error updating name:", err);
       const msg =
@@ -239,7 +243,6 @@ function ProfileContent({
           signOutOfOtherSessions: false,
         });
       } else {
-        // Set initial password for OAuth user
         await user.updatePassword({
           newPassword,
         });
@@ -251,8 +254,8 @@ function ProfileContent({
       setConfirmPassword("");
       setPasswordSuccessMessage(
         user.passwordEnabled
-          ? "Password changed successfully!"
-          : "Password created successfully! You can now log in using email & password."
+          ? "Password updated successfully!"
+          : "Password created successfully! You can now log in with email."
       );
     } catch (err: unknown) {
       console.error("Error updating password:", err);
@@ -271,7 +274,7 @@ function ProfileContent({
     try {
       setIsSigningOut(true);
       await signOut();
-      router.replace("/");
+      router.replace("/sign-in");
     } catch (err) {
       console.error("Sign out error:", err);
     } finally {
@@ -283,6 +286,11 @@ function ProfileContent({
     user.primaryEmailAddress?.emailAddress ||
     user.emailAddresses?.[0]?.emailAddress ||
     "";
+  const displayName =
+    user.fullName ||
+    [user.firstName, user.lastName].filter(Boolean).join(" ") ||
+    primaryEmail.split("@")[0] ||
+    "Shopper";
   const userInitials =
     ((user.firstName?.[0] ?? "") + (user.lastName?.[0] ?? "")).toUpperCase() ||
     primaryEmail.charAt(0).toUpperCase() ||
@@ -294,45 +302,35 @@ function ProfileContent({
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardView}
       >
+        {/* Modern Top Header */}
+        <View style={styles.topBar}>
+          <Pressable
+            style={styles.backButton}
+            hitSlop={12}
+            onPress={() => {
+              if (router.canGoBack()) {
+                router.back();
+              } else {
+                router.replace("/(tabs)/settings");
+              }
+            }}
+          >
+            <Ionicons name="chevron-back" size={20} color="#059669" />
+            <Text style={styles.backButtonText}>Back</Text>
+          </Pressable>
+          <Text style={styles.pageTitle}>Edit Profile</Text>
+          <View style={styles.headerRightPlaceholder} />
+        </View>
+
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
-          {/* Header Bar */}
-          <View style={styles.topBar}>
-            <Link href={"/" as Href} asChild>
-              <Pressable style={styles.backButton} hitSlop={8}>
-                <Ionicons name="arrow-back" size={18} color="#16a34a" />
-                <Text style={styles.backButtonText}>Home</Text>
-              </Pressable>
-            </Link>
-            <Text style={styles.pageTitle}>Profile & Settings</Text>
-            <View style={{ width: 60 }} />
-          </View>
-
-          {/* 1. Profile Picture Card */}
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>Profile Picture</Text>
-            <Text style={styles.cardSubtitle}>
-              Update your photo across your Grocify account
-            </Text>
-
-            {imageSuccessMessage && (
-              <View style={styles.bannerSuccess}>
-                <Text style={styles.bannerSuccessText}>
-                  {imageSuccessMessage}
-                </Text>
-              </View>
-            )}
-
-            {imageErrorMessage && (
-              <View style={styles.bannerError}>
-                <Text style={styles.bannerErrorText}>{imageErrorMessage}</Text>
-              </View>
-            )}
-
-            <View style={styles.avatarSection}>
-              <View style={styles.avatarWrapper}>
+          {/* Hero Profile Photo Section */}
+          <View style={styles.heroCard}>
+            <View style={styles.avatarContainer}>
+              <View style={styles.avatarRing}>
                 {user.imageUrl ? (
                   <Image
                     source={{ uri: user.imageUrl }}
@@ -353,115 +351,146 @@ function ProfileContent({
                 )}
               </View>
 
-              <View style={styles.avatarActions}>
-                <TouchableOpacity
-                  style={[
-                    styles.secondaryButton,
-                    isUploadingImage && styles.buttonDisabled,
-                  ]}
-                  onPress={handlePickImage}
-                  disabled={isUploadingImage}
-                  activeOpacity={0.8}
-                >
-                  <Ionicons name="camera-outline" size={18} color="#374151" />
-                  <Text style={styles.secondaryButtonText}>
-                    {isUploadingImage ? "Uploading..." : "Change Photo"}
-                  </Text>
-                </TouchableOpacity>
+              {/* Floating Camera Button */}
+              <TouchableOpacity
+                style={styles.cameraBadge}
+                onPress={handlePickImage}
+                disabled={isUploadingImage}
+                activeOpacity={0.8}
+              >
+                <Ionicons name="camera" size={16} color="#ffffff" />
+              </TouchableOpacity>
+            </View>
 
-                {user.hasImage && (
-                  <TouchableOpacity
-                    style={[
-                      styles.textDangerButton,
-                      isUploadingImage && styles.buttonDisabled,
-                    ]}
-                    onPress={handleRemoveImage}
-                    disabled={isUploadingImage}
-                    activeOpacity={0.8}
-                  >
-                    <Text style={styles.textDangerButtonLabel}>Remove photo</Text>
-                  </TouchableOpacity>
-                )}
+            <Text style={styles.heroName}>{displayName}</Text>
+            <View style={styles.heroBadgeRow}>
+              <View style={styles.statusPill}>
+                <Ionicons name="checkmark-circle" size={13} color="#059669" />
+                <Text style={styles.statusPillText}>Active Account</Text>
               </View>
             </View>
+
+            {user.hasImage && (
+              <TouchableOpacity
+                style={styles.removePhotoBtn}
+                onPress={handleRemoveImage}
+                disabled={isUploadingImage}
+              >
+                <Text style={styles.removePhotoText}>Remove photo</Text>
+              </TouchableOpacity>
+            )}
+
+            {imageSuccessMessage && (
+              <View style={styles.bannerSuccess}>
+                <Ionicons name="checkmark-circle-outline" size={16} color="#047857" />
+                <Text style={styles.bannerSuccessText}>{imageSuccessMessage}</Text>
+              </View>
+            )}
+
+            {imageErrorMessage && (
+              <View style={styles.bannerError}>
+                <Ionicons name="alert-circle-outline" size={16} color="#b91c1c" />
+                <Text style={styles.bannerErrorText}>{imageErrorMessage}</Text>
+              </View>
+            )}
           </View>
 
-          {/* 2. Personal Information Card */}
+          {/* 1. Personal Information Card */}
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>Personal Information</Text>
-            <Text style={styles.cardSubtitle}>
-              Update your first and last name
-            </Text>
+            <View style={styles.cardHeaderRow}>
+              <View style={[styles.iconSquircle, { backgroundColor: "#ecfdf5" }]}>
+                <Ionicons name="person-outline" size={20} color="#059669" />
+              </View>
+              <View style={styles.cardHeaderTexts}>
+                <Text style={styles.cardTitle}>Personal Information</Text>
+                <Text style={styles.cardSubtitle}>Your public display name</Text>
+              </View>
+            </View>
 
             {nameSuccessMessage && (
               <View style={styles.bannerSuccess}>
+                <Ionicons name="checkmark-circle-outline" size={16} color="#047857" />
                 <Text style={styles.bannerSuccessText}>{nameSuccessMessage}</Text>
               </View>
             )}
 
             {nameErrorMessage && (
               <View style={styles.bannerError}>
+                <Ionicons name="alert-circle-outline" size={16} color="#b91c1c" />
                 <Text style={styles.bannerErrorText}>{nameErrorMessage}</Text>
               </View>
             )}
 
-            <View style={styles.fieldGroup}>
-              <Text style={styles.label}>First Name</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter first name"
-                placeholderTextColor="#9ca3af"
-                value={firstName}
-                onChangeText={(t) => {
-                  setFirstName(t);
-                  setNameSuccessMessage(null);
-                  setNameErrorMessage(null);
-                }}
-              />
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>First Name</Text>
+              <View style={styles.inputWrapper}>
+                <Ionicons name="person-outline" size={18} color="#94a3b8" />
+                <TextInput
+                  style={styles.textInputField}
+                  placeholder="Enter first name"
+                  placeholderTextColor="#94a3b8"
+                  value={firstName}
+                  onChangeText={(t) => {
+                    setFirstName(t);
+                    setNameSuccessMessage(null);
+                    setNameErrorMessage(null);
+                  }}
+                />
+              </View>
             </View>
 
-            <View style={styles.fieldGroup}>
-              <Text style={styles.label}>Last Name</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter last name"
-                placeholderTextColor="#9ca3af"
-                value={lastName}
-                onChangeText={(t) => {
-                  setLastName(t);
-                  setNameSuccessMessage(null);
-                  setNameErrorMessage(null);
-                }}
-              />
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Last Name</Text>
+              <View style={styles.inputWrapper}>
+                <Ionicons name="person-outline" size={18} color="#94a3b8" />
+                <TextInput
+                  style={styles.textInputField}
+                  placeholder="Enter last name"
+                  placeholderTextColor="#94a3b8"
+                  value={lastName}
+                  onChangeText={(t) => {
+                    setLastName(t);
+                    setNameSuccessMessage(null);
+                    setNameErrorMessage(null);
+                  }}
+                />
+              </View>
             </View>
 
             <TouchableOpacity
-              style={[
-                styles.primaryButton,
-                isSavingName && styles.buttonDisabled,
-              ]}
+              style={[styles.primaryButton, isSavingName && styles.buttonDisabled]}
               onPress={handleUpdateName}
               disabled={isSavingName}
-              activeOpacity={0.8}
+              activeOpacity={0.85}
             >
               {isSavingName ? (
                 <View style={styles.buttonLoadingContent}>
                   <ActivityIndicator color="#ffffff" size="small" />
-                  <Text style={styles.primaryButtonText}>Saving...</Text>
+                  <Text style={styles.primaryButtonText}>Saving Changes...</Text>
                 </View>
               ) : (
-                <Text style={styles.primaryButtonText}>Save Name Changes</Text>
+                <Text style={styles.primaryButtonText}>Save Changes</Text>
               )}
             </TouchableOpacity>
           </View>
 
-          {/* 3. Password Reset / Change Options Card */}
+          {/* 2. Password & Security Card */}
           <View style={styles.card}>
-            <View style={styles.sectionHeaderRow}>
-              <Text style={styles.cardTitle}>Password & Security</Text>
+            <View style={styles.cardHeaderRow}>
+              <View style={[styles.iconSquircle, { backgroundColor: "#fef3c7" }]}>
+                <Ionicons name="shield-checkmark-outline" size={20} color="#d97706" />
+              </View>
+              <View style={styles.cardHeaderTexts}>
+                <Text style={styles.cardTitle}>Password & Security</Text>
+                <Text style={styles.cardSubtitle}>
+                  {user.passwordEnabled
+                    ? "Update your existing account password"
+                    : "Create password for direct email sign-in"}
+                </Text>
+              </View>
               <View
                 style={[
-                  styles.badge,
+                  styles.badgePill,
                   user.passwordEnabled ? styles.badgeSuccess : styles.badgeInfo,
                 ]}
               >
@@ -472,42 +501,34 @@ function ProfileContent({
                       : styles.badgeInfoText
                   }
                 >
-                  {user.passwordEnabled ? "Password Set" : "OAuth Only"}
+                  {user.passwordEnabled ? "Active" : "OAuth"}
                 </Text>
               </View>
             </View>
 
-            <Text style={styles.cardSubtitle}>
-              {user.passwordEnabled
-                ? "Update your existing account password"
-                : "Add a password to your account so you can also log in with email"}
-            </Text>
-
             {passwordSuccessMessage && (
               <View style={styles.bannerSuccess}>
-                <Text style={styles.bannerSuccessText}>
-                  {passwordSuccessMessage}
-                </Text>
+                <Ionicons name="checkmark-circle-outline" size={16} color="#047857" />
+                <Text style={styles.bannerSuccessText}>{passwordSuccessMessage}</Text>
               </View>
             )}
 
             {passwordErrorMessage && (
               <View style={styles.bannerError}>
-                <Text style={styles.bannerErrorText}>
-                  {passwordErrorMessage}
-                </Text>
+                <Ionicons name="alert-circle-outline" size={16} color="#b91c1c" />
+                <Text style={styles.bannerErrorText}>{passwordErrorMessage}</Text>
               </View>
             )}
 
-            {/* Current Password - Only if password is enabled */}
             {user.passwordEnabled && (
-              <View style={styles.fieldGroup}>
-                <Text style={styles.label}>Current Password</Text>
-                <View style={styles.passwordContainer}>
+              <View style={styles.inputContainer}>
+                <Text style={styles.inputLabel}>Current Password</Text>
+                <View style={styles.inputWrapper}>
+                  <Ionicons name="lock-closed-outline" size={18} color="#94a3b8" />
                   <TextInput
-                    style={[styles.input, styles.passwordInput]}
+                    style={styles.textInputField}
                     placeholder="Enter current password"
-                    placeholderTextColor="#9ca3af"
+                    placeholderTextColor="#94a3b8"
                     secureTextEntry={!showCurrentPassword}
                     value={currentPassword}
                     onChangeText={(t) => {
@@ -518,27 +539,28 @@ function ProfileContent({
                   />
                   <Pressable
                     onPress={() => setShowCurrentPassword((prev) => !prev)}
-                    style={styles.showPasswordButton}
                     hitSlop={8}
                   >
-                    <Text style={styles.showPasswordText}>
-                      {showCurrentPassword ? "Hide" : "Show"}
-                    </Text>
+                    <Ionicons
+                      name={showCurrentPassword ? "eye-off-outline" : "eye-outline"}
+                      size={20}
+                      color="#64748b"
+                    />
                   </Pressable>
                 </View>
               </View>
             )}
 
-            {/* New Password */}
-            <View style={styles.fieldGroup}>
-              <Text style={styles.label}>
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>
                 {user.passwordEnabled ? "New Password" : "Create Password"}
               </Text>
-              <View style={styles.passwordContainer}>
+              <View style={styles.inputWrapper}>
+                <Ionicons name="key-outline" size={18} color="#94a3b8" />
                 <TextInput
-                  style={[styles.input, styles.passwordInput]}
-                  placeholder="At least 8 characters"
-                  placeholderTextColor="#9ca3af"
+                  style={styles.textInputField}
+                  placeholder="Min 8 characters"
+                  placeholderTextColor="#94a3b8"
                   secureTextEntry={!showNewPassword}
                   value={newPassword}
                   onChangeText={(t) => {
@@ -549,31 +571,44 @@ function ProfileContent({
                 />
                 <Pressable
                   onPress={() => setShowNewPassword((prev) => !prev)}
-                  style={styles.showPasswordButton}
                   hitSlop={8}
                 >
-                  <Text style={styles.showPasswordText}>
-                    {showNewPassword ? "Hide" : "Show"}
-                  </Text>
+                  <Ionicons
+                    name={showNewPassword ? "eye-off-outline" : "eye-outline"}
+                    size={20}
+                    color="#64748b"
+                  />
                 </Pressable>
               </View>
             </View>
 
-            {/* Confirm New Password */}
-            <View style={styles.fieldGroup}>
-              <Text style={styles.label}>Confirm New Password</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Re-enter new password"
-                placeholderTextColor="#9ca3af"
-                secureTextEntry={!showNewPassword}
-                value={confirmPassword}
-                onChangeText={(t) => {
-                  setConfirmPassword(t);
-                  setPasswordSuccessMessage(null);
-                  setPasswordErrorMessage(null);
-                }}
-              />
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Confirm New Password</Text>
+              <View style={styles.inputWrapper}>
+                <Ionicons name="key-outline" size={18} color="#94a3b8" />
+                <TextInput
+                  style={styles.textInputField}
+                  placeholder="Re-enter new password"
+                  placeholderTextColor="#94a3b8"
+                  secureTextEntry={!showConfirmPassword}
+                  value={confirmPassword}
+                  onChangeText={(t) => {
+                    setConfirmPassword(t);
+                    setPasswordSuccessMessage(null);
+                    setPasswordErrorMessage(null);
+                  }}
+                />
+                <Pressable
+                  onPress={() => setShowConfirmPassword((prev) => !prev)}
+                  hitSlop={8}
+                >
+                  <Ionicons
+                    name={showConfirmPassword ? "eye-off-outline" : "eye-outline"}
+                    size={20}
+                    color="#64748b"
+                  />
+                </Pressable>
+              </View>
             </View>
 
             <TouchableOpacity
@@ -583,47 +618,51 @@ function ProfileContent({
               ]}
               onPress={handleUpdatePassword}
               disabled={isUpdatingPassword}
-              activeOpacity={0.8}
+              activeOpacity={0.85}
             >
               {isUpdatingPassword ? (
                 <View style={styles.buttonLoadingContent}>
                   <ActivityIndicator color="#ffffff" size="small" />
-                  <Text style={styles.primaryButtonText}>
-                    Updating Password...
-                  </Text>
+                  <Text style={styles.primaryButtonText}>Updating...</Text>
                 </View>
               ) : (
                 <Text style={styles.primaryButtonText}>
-                  {user.passwordEnabled
-                    ? "Update Password"
-                    : "Set Account Password"}
+                  {user.passwordEnabled ? "Update Password" : "Set Password"}
                 </Text>
               )}
             </TouchableOpacity>
           </View>
 
-          {/* 4. Account Details Card */}
+          {/* 3. Account & Connected Logins Card */}
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>Account Details</Text>
-
-            <View style={styles.accountRow}>
-              <View style={styles.accountRowLeft}>
-                <Ionicons name="mail-outline" size={20} color="#6b7280" />
-                <View>
-                  <Text style={styles.accountLabel}>Email Address</Text>
-                  <Text style={styles.accountValue}>{primaryEmail}</Text>
-                </View>
+            <View style={styles.cardHeaderRow}>
+              <View style={[styles.iconSquircle, { backgroundColor: "#e0f2fe" }]}>
+                <Ionicons name="finger-print-outline" size={20} color="#0284c7" />
               </View>
-              <View style={styles.badgeSuccess}>
-                <Text style={styles.badgeSuccessText}>Verified</Text>
+              <View style={styles.cardHeaderTexts}>
+                <Text style={styles.cardTitle}>Account Details</Text>
+                <Text style={styles.cardSubtitle}>Email & authentication</Text>
               </View>
             </View>
 
-            {/* External OAuth Connections */}
+            <View style={styles.infoRow}>
+              <View style={styles.infoRowLeft}>
+                <Ionicons name="mail-outline" size={18} color="#64748b" />
+                <View>
+                  <Text style={styles.infoRowLabel}>Email Address</Text>
+                  <Text style={styles.infoRowValue}>{primaryEmail}</Text>
+                </View>
+              </View>
+              <View style={styles.verifiedChip}>
+                <Ionicons name="checkmark-circle" size={13} color="#059669" />
+                <Text style={styles.verifiedChipText}>Verified</Text>
+              </View>
+            </View>
+
             {user.externalAccounts && user.externalAccounts.length > 0 && (
-              <View style={styles.externalAccountsContainer}>
-                <Text style={styles.accountLabel}>Connected Social Logins</Text>
-                <View style={styles.providersRow}>
+              <View style={styles.socialAccountsBox}>
+                <Text style={styles.infoRowLabel}>Connected Social Logins</Text>
+                <View style={styles.providersWrap}>
                   {user.externalAccounts.map((account) => {
                     const providerName =
                       account.provider === "google"
@@ -645,19 +684,17 @@ function ProfileContent({
                       account.provider === "google"
                         ? "#ea4335"
                         : account.provider === "github"
-                        ? "#24292f"
+                        ? "#1e293b"
                         : "#1877f2";
 
                     return (
-                      <View key={account.id} style={styles.providerBadge}>
+                      <View key={account.id} style={styles.providerChip}>
                         <Ionicons
                           name={iconName as any}
                           size={14}
                           color={iconColor}
                         />
-                        <Text style={styles.providerBadgeText}>
-                          {providerName}
-                        </Text>
+                        <Text style={styles.providerChipText}>{providerName}</Text>
                       </View>
                     );
                   })}
@@ -665,14 +702,14 @@ function ProfileContent({
               </View>
             )}
 
-            <View style={styles.accountFooter}>
-              <Text style={styles.userIdText}>User ID: {user.id}</Text>
+            <View style={styles.idFooter}>
+              <Text style={styles.idText}>User ID: {user.id}</Text>
             </View>
           </View>
 
-          {/* 5. Sign Out Button */}
+          {/* 4. Sign Out Button */}
           <TouchableOpacity
-            style={[styles.signOutButton, isSigningOut && styles.buttonDisabled]}
+            style={[styles.signOutBtn, isSigningOut && styles.buttonDisabled]}
             onPress={handleSignOut}
             disabled={isSigningOut}
             activeOpacity={0.8}
@@ -680,9 +717,9 @@ function ProfileContent({
             {isSigningOut ? (
               <ActivityIndicator color="#dc2626" size="small" />
             ) : (
-              <View style={styles.buttonLoadingContent}>
+              <View style={styles.signOutBtnContent}>
                 <Ionicons name="log-out-outline" size={20} color="#dc2626" />
-                <Text style={styles.signOutButtonText}>Sign Out of Grocify</Text>
+                <Text style={styles.signOutBtnText}>Sign Out of Grocify</Text>
               </View>
             )}
           </TouchableOpacity>
@@ -695,22 +732,22 @@ function ProfileContent({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#f9fafb",
+    backgroundColor: "#f8fafc",
   },
   keyboardView: {
     flex: 1,
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 40,
-    gap: 18,
+    paddingTop: 12,
+    paddingBottom: 48,
+    gap: 16,
   },
   centered: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f9fafb",
+    backgroundColor: "#f8fafc",
   },
   notSignedInContainer: {
     flex: 1,
@@ -719,83 +756,84 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     gap: 12,
   },
+  warningIconCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: "#fee2e2",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 8,
+  },
   notSignedInTitle: {
     fontSize: 22,
-    fontWeight: "700",
-    color: "#111827",
+    fontWeight: "800",
+    color: "#0f172a",
   },
   notSignedInSubtitle: {
     fontSize: 14,
-    color: "#6b7280",
+    color: "#64748b",
     textAlign: "center",
-    marginBottom: 12,
+    marginBottom: 16,
   },
   topBar: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 4,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f1f5f9",
+    backgroundColor: "#ffffff",
   },
   backButton: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+    gap: 2,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 20,
     backgroundColor: "#ecfdf5",
-    borderRadius: 16,
   },
   backButtonText: {
-    color: "#16a34a",
+    color: "#059669",
     fontSize: 14,
     fontWeight: "700",
   },
   pageTitle: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: "700",
-    color: "#111827",
+    color: "#0f172a",
   },
-  card: {
+  headerRightPlaceholder: {
+    width: 64,
+  },
+  heroCard: {
+    alignItems: "center",
     backgroundColor: "#ffffff",
-    borderRadius: 20,
-    padding: 20,
-    shadowColor: "#000",
+    borderRadius: 24,
+    paddingVertical: 24,
+    paddingHorizontal: 20,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    shadowColor: "#0f172a",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,
     shadowRadius: 8,
     elevation: 2,
-    gap: 14,
   },
-  sectionHeaderRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#111827",
-  },
-  cardSubtitle: {
-    fontSize: 13,
-    color: "#6b7280",
-    marginTop: -4,
-  },
-  avatarSection: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 18,
-    marginTop: 4,
-  },
-  avatarWrapper: {
+  avatarContainer: {
     position: "relative",
-    width: 84,
-    height: 84,
-    borderRadius: 42,
+    marginBottom: 12,
+  },
+  avatarRing: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
     overflow: "hidden",
     backgroundColor: "#dcfce7",
-    borderWidth: 2.5,
-    borderColor: "#16a34a",
+    borderWidth: 3,
+    borderColor: "#10b981",
   },
   avatarImage: {
     width: "100%",
@@ -807,9 +845,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   avatarInitials: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: "800",
-    color: "#16a34a",
+    color: "#059669",
   },
   avatarLoadingOverlay: {
     position: "absolute",
@@ -817,210 +855,159 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.45)",
+    backgroundColor: "rgba(15, 23, 42, 0.5)",
     alignItems: "center",
     justifyContent: "center",
   },
-  avatarActions: {
-    flex: 1,
-    gap: 8,
-    justifyContent: "center",
-  },
-  fieldGroup: {
-    gap: 6,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#374151",
-  },
-  input: {
-    borderWidth: 1.5,
-    borderColor: "#e5e7eb",
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 15,
-    color: "#111827",
-    backgroundColor: "#f9fafb",
-  },
-  passwordContainer: {
-    position: "relative",
-    justifyContent: "center",
-  },
-  passwordInput: {
-    paddingRight: 64,
-  },
-  showPasswordButton: {
+  cameraBadge: {
     position: "absolute",
-    right: 14,
-    paddingVertical: 4,
-  },
-  showPasswordText: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#16a34a",
-  },
-  primaryButton: {
-    backgroundColor: "#16a34a",
-    minHeight: 48,
-    paddingVertical: 12,
-    paddingHorizontal: 18,
-    borderRadius: 12,
+    bottom: 0,
+    right: 0,
+    backgroundColor: "#059669",
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
+    borderWidth: 2.5,
+    borderColor: "#ffffff",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  heroName: {
+    fontSize: 20,
+    fontWeight: "800",
+    color: "#0f172a",
+    letterSpacing: -0.3,
+  },
+  heroBadgeRow: {
     marginTop: 6,
-    width: "100%",
   },
-  primaryButtonText: {
-    color: "#ffffff",
-    fontSize: 15,
-    fontWeight: "700",
-  },
-  secondaryButton: {
+  statusPill: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    backgroundColor: "#f3f4f6",
-    borderWidth: 1,
-    borderColor: "#e5e7eb",
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    borderRadius: 10,
-    alignSelf: "flex-start",
-  },
-  secondaryButtonText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#374151",
-  },
-  textDangerButton: {
-    alignSelf: "flex-start",
-    paddingVertical: 4,
-  },
-  textDangerButtonLabel: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#dc2626",
-  },
-  bannerSuccess: {
-    backgroundColor: "#ecfdf5",
-    borderColor: "#a7f3d0",
-    borderWidth: 1,
-    borderRadius: 12,
-    padding: 12,
-  },
-  bannerSuccessText: {
-    color: "#047857",
-    fontSize: 13,
-    fontWeight: "600",
-    textAlign: "center",
-  },
-  bannerError: {
-    backgroundColor: "#fee2e2",
-    borderColor: "#fca5a5",
-    borderWidth: 1,
-    borderRadius: 12,
-    padding: 12,
-  },
-  bannerErrorText: {
-    color: "#b91c1c",
-    fontSize: 13,
-    fontWeight: "500",
-    textAlign: "center",
-  },
-  badge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  badgeSuccess: {
+    gap: 5,
     backgroundColor: "#ecfdf5",
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 12,
+    borderRadius: 20,
   },
-  badgeSuccessText: {
+  statusPillText: {
     fontSize: 12,
     fontWeight: "700",
-    color: "#16a34a",
+    color: "#059669",
   },
-  badgeInfo: {
-    backgroundColor: "#eff6ff",
+  removePhotoBtn: {
+    marginTop: 10,
+    paddingVertical: 4,
   },
-  badgeInfoText: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#2563eb",
+  removePhotoText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#ef4444",
   },
-  accountRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f3f4f6",
+  card: {
+    backgroundColor: "#ffffff",
+    borderRadius: 22,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    shadowColor: "#0f172a",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
+    gap: 14,
   },
-  accountRowLeft: {
+  cardHeaderRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
   },
-  accountLabel: {
-    fontSize: 12,
-    color: "#6b7280",
-    fontWeight: "500",
-  },
-  accountValue: {
-    fontSize: 14,
-    color: "#111827",
-    fontWeight: "600",
-    marginTop: 2,
-  },
-  externalAccountsContainer: {
-    gap: 8,
-    paddingVertical: 6,
-  },
-  providersRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  providerBadge: {
-    flexDirection: "row",
+  iconSquircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
     alignItems: "center",
-    gap: 6,
-    backgroundColor: "#f9fafb",
-    borderWidth: 1,
-    borderColor: "#e5e7eb",
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 8,
+    justifyContent: "center",
   },
-  providerBadgeText: {
+  cardHeaderTexts: {
+    flex: 1,
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#0f172a",
+  },
+  cardSubtitle: {
+    fontSize: 12,
+    color: "#64748b",
+    marginTop: 1,
+  },
+  badgePill: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+  },
+  badgeSuccess: {
+    backgroundColor: "#ecfdf5",
+  },
+  badgeSuccessText: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#059669",
+  },
+  badgeInfo: {
+    backgroundColor: "#f1f5f9",
+  },
+  badgeInfoText: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#475569",
+  },
+  inputContainer: {
+    gap: 6,
+  },
+  inputLabel: {
     fontSize: 13,
     fontWeight: "600",
-    color: "#374151",
+    color: "#334155",
   },
-  accountFooter: {
-    marginTop: 4,
+  inputWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    backgroundColor: "#f8fafc",
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    height: 48,
   },
-  userIdText: {
-    fontSize: 12,
-    color: "#9ca3af",
+  textInputField: {
+    flex: 1,
+    fontSize: 14,
+    color: "#0f172a",
+    height: "100%",
   },
-  signOutButton: {
-    backgroundColor: "#fee2e2",
-    minHeight: 52,
-    paddingVertical: 14,
+  primaryButton: {
+    backgroundColor: "#059669",
+    height: 48,
     borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
-    width: "100%",
+    marginTop: 4,
+    shadowColor: "#059669",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  signOutButtonText: {
-    color: "#dc2626",
+  primaryButtonText: {
+    color: "#ffffff",
     fontSize: 15,
     fontWeight: "700",
   },
@@ -1030,6 +1017,134 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   buttonDisabled: {
-    opacity: 0.6,
+    opacity: 0.65,
+  },
+  bannerSuccess: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: "#ecfdf5",
+    borderWidth: 1,
+    borderColor: "#a7f3d0",
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+  },
+  bannerSuccessText: {
+    flex: 1,
+    color: "#047857",
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  bannerError: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: "#fef2f2",
+    borderWidth: 1,
+    borderColor: "#fecaca",
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+  },
+  bannerErrorText: {
+    flex: 1,
+    color: "#b91c1c",
+    fontSize: 13,
+    fontWeight: "500",
+  },
+  infoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#f8fafc",
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+  },
+  infoRowLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    flex: 1,
+  },
+  infoRowLabel: {
+    fontSize: 11,
+    color: "#64748b",
+    fontWeight: "600",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  infoRowValue: {
+    fontSize: 14,
+    color: "#0f172a",
+    fontWeight: "600",
+    marginTop: 2,
+  },
+  verifiedChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: "#ecfdf5",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  verifiedChipText: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#059669",
+  },
+  socialAccountsBox: {
+    gap: 8,
+  },
+  providersWrap: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  providerChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: "#f8fafc",
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+  },
+  providerChipText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#334155",
+  },
+  idFooter: {
+    paddingTop: 4,
+  },
+  idText: {
+    fontSize: 11,
+    color: "#94a3b8",
+  },
+  signOutBtn: {
+    backgroundColor: "#fef2f2",
+    borderWidth: 1,
+    borderColor: "#fee2e2",
+    height: 52,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 8,
+  },
+  signOutBtnContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  signOutBtnText: {
+    color: "#dc2626",
+    fontSize: 15,
+    fontWeight: "700",
   },
 });

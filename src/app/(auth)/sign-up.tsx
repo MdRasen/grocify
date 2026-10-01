@@ -146,7 +146,7 @@ export default function SignUpScreen() {
       if (signUp.status === "complete") {
         await signUp.finalize({
           navigate: () => {
-            router.replace("/");
+            router.replace("/(tabs)/index");
           },
         });
       } else {

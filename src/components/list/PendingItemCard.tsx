@@ -1,5 +1,5 @@
 import { FontAwesome6 } from "@expo/vector-icons";
-import { Pressable, Text, View } from "react-native";
+import { TouchableOpacity, Text, View } from "react-native";
 import { GroceryItem, useGroceryStore } from "../../store/grocery-store";
 
 const priorityPillBg = {
@@ -20,12 +20,12 @@ const PendingItemCard = ({ item }: { item: GroceryItem }) => {
   return (
     <View className="rounded-[28px] border border-slate-100 bg-card p-[18px] shadow-sm shadow-slate-200/50">
       <View className="flex-row items-start gap-4">
-        <Pressable
+        <TouchableOpacity
           className={`mt-1 h-6 w-6 items-center justify-center rounded-full border-2 ${item.purchased ? 'border-primary bg-primary' : 'border-slate-300 bg-transparent'}`}
           onPress={() => togglePurchased(item.id)}
         >
           {item.purchased && <FontAwesome6 name="check" size={10} color="#ffffff" />}
-        </Pressable>
+        </TouchableOpacity>
 
         <View className="flex-1">
           <View className="flex-row items-center justify-between gap-2">
@@ -52,34 +52,34 @@ const PendingItemCard = ({ item }: { item: GroceryItem }) => {
           </View>
 
           <View className="mt-4 flex-row items-center gap-3">
-            <Pressable
-              className="h-8 w-8 items-center justify-center rounded-full bg-slate-100 active:opacity-70"
+            <TouchableOpacity
+              className="h-8 w-8 items-center justify-center rounded-full bg-slate-100"
               onPress={() =>
                 updateQuantity(item.id, Math.max(1, item.quantity - 1))
               }
             >
               <FontAwesome6 name="minus" size={12} color="#64748b" />
-            </Pressable>
+            </TouchableOpacity>
 
             <Text className="min-w-[24px] text-center text-base font-semibold text-slate-700">
               {item.quantity}
             </Text>
 
-            <Pressable
-              className="h-8 w-8 items-center justify-center rounded-full bg-slate-100 active:opacity-70"
+            <TouchableOpacity
+              className="h-8 w-8 items-center justify-center rounded-full bg-slate-100"
               onPress={() => updateQuantity(item.id, item.quantity + 1)}
             >
               <FontAwesome6 name="plus" size={12} color="#64748b" />
-            </Pressable>
+            </TouchableOpacity>
           </View>
         </View>
 
-        <Pressable
-          className="h-10 w-10 items-center justify-center rounded-full bg-red-50 active:opacity-70"
+        <TouchableOpacity
+          className="h-10 w-10 items-center justify-center rounded-full bg-red-50"
           onPress={() => removeItem(item.id)}
         >
           <FontAwesome6 name="trash" size={14} color="#ef4444" />
-        </Pressable>
+        </TouchableOpacity>
       </View>
     </View>
   );

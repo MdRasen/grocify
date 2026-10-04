@@ -1,12 +1,12 @@
-import { useEffect } from "react";
 import { useGroceryStore } from "@/store/grocery-store";
+import { useEffect } from "react";
 import { Text, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, { FadeInDown, Layout } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import PendingItemCard from "../../components/list/PendingItemCard";
 import CompletedItems from "../../components/list/CompletedItems";
 import ListHeroCard from "../../components/list/ListHeroCard";
+import PendingItemCard from "../../components/list/PendingItemCard";
 import TabScreenBackground from "../../components/TabScreenBackground";
 
 export default function ListScreen() {
@@ -15,7 +15,7 @@ export default function ListScreen() {
 
   useEffect(() => {
     loadItems();
-  }, []);
+  }, [loadItems]);
 
   const pendingItems = items.filter((item) => !item.purchased);
 
@@ -25,14 +25,14 @@ export default function ListScreen() {
       <TabScreenBackground />
 
       <Animated.FlatList
-        className="flex-1"
+        style={{ flex: 1 }}
         data={pendingItems}
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ 
-          padding: 20, 
+        contentContainerStyle={{
+          padding: 20,
           paddingTop: insets.top + 20,
-          gap: 14 
+          gap: 14
         }}
         itemLayoutAnimation={Layout.springify()}
         renderItem={({ item, index }) => (
@@ -43,7 +43,7 @@ export default function ListScreen() {
         ListHeaderComponent={
           <Animated.View entering={FadeInDown.springify()} style={{ gap: 16, paddingBottom: 10 }}>
             <ListHeroCard />
-            
+
             <View className="flex-row items-end justify-between px-2 pt-4">
               <Text className="text-sm font-bold uppercase tracking-wider text-muted-foreground/80">
                 Shopping items
@@ -58,11 +58,13 @@ export default function ListScreen() {
         }
         ListEmptyComponent={
           !isLoading ? (
-            <Animated.View entering={FadeInDown.delay(200)} className="mt-8 items-center justify-center p-6 opacity-60">
-              <Text className="text-lg font-bold text-muted-foreground">All caught up!</Text>
-              <Text className="mt-2 text-center text-sm text-muted-foreground">
-                Your grocery board is clear. Time to relax or add some new items.
-              </Text>
+            <Animated.View entering={FadeInDown.delay(200)} style={{ marginTop: 32, alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+              <View style={{ opacity: 0.6, alignItems: 'center' }}>
+                <Text className="text-lg font-bold text-muted-foreground">All caught up!</Text>
+                <Text className="mt-2 text-center text-sm text-muted-foreground">
+                  Your grocery board is clear. Time to relax or add some new items.
+                </Text>
+              </View>
             </Animated.View>
           ) : null
         }

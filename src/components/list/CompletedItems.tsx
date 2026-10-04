@@ -1,5 +1,5 @@
 import { FontAwesome6 } from "@expo/vector-icons";
-import { Pressable, Text, View } from "react-native";
+import { TouchableOpacity, Text, View } from "react-native";
 import { useGroceryStore } from "../../store/grocery-store";
 
 const CompletedItems = () => {
@@ -20,23 +20,23 @@ const CompletedItems = () => {
           className="mb-2 flex-row items-center justify-between rounded-2xl border border-white/50 bg-white px-4 py-3 shadow-sm shadow-slate-200/40"
         >
           <View className="flex-row items-center gap-3">
-            <Pressable
+            <TouchableOpacity
               onPress={() => togglePurchased(item.id)}
-              className="h-6 w-6 items-center justify-center rounded-full bg-slate-200 active:opacity-70"
+              className="h-6 w-6 items-center justify-center rounded-full bg-slate-200"
             >
               <FontAwesome6 name="rotate-left" size={10} color="#64748b" />
-            </Pressable>
+            </TouchableOpacity>
             <Text className="text-[15px] font-medium text-slate-400 line-through">
               {item.name}
             </Text>
           </View>
 
-          <Pressable
+          <TouchableOpacity
             onPress={() => removeItem(item.id)}
-            className="h-8 w-8 items-center justify-center rounded-full bg-red-50 active:opacity-70"
+            className="h-8 w-8 items-center justify-center rounded-full bg-red-50"
           >
             <FontAwesome6 name="trash" size={12} color="#ef4444" />
-          </Pressable>
+          </TouchableOpacity>
         </View>
       ))}
     </View>

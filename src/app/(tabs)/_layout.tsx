@@ -67,8 +67,8 @@ export default function TabLayout() {
           title: "Planner",
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
-              name={focused ? "calendar" : "calendar-outline"}
-              size={24}
+              name={focused ? "add-circle" : "add-circle-outline"}
+              size={28}
               color={color}
             />
           ),

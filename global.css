@@ -1,3 +1,47 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    /* Backgrounds */
+    --background: #f8fafc;
+    --foreground: #0f172a;
+    --card: #ffffff;
+    --card-foreground: #1e293b;
+    --popover: #ffffff;
+    --popover-foreground: #1e293b;
+    
+    /* Vibrant Emerald Primary */
+    --primary: #10b981; 
+    --primary-foreground: #ffffff;
+    
+    /* Soft bluish-gray for secondary */
+    --secondary: #f1f5f9;
+    --secondary-foreground: #475569;
+    
+    --muted: #f8fafc;
+    --muted-foreground: #94a3b8;
+    
+    /* Accent as a light minty tint */
+    --accent: #d1fae5;
+    --accent-foreground: #047857;
+    
+    /* Destructive soft red */
+    --destructive: #fee2e2;
+    --destructive-foreground: #ef4444;
+    
+    /* Subtle borders */
+    --border: #e2e8f0;
+    --input: #e2e8f0;
+    --ring: #10b981;
+    
+    /* Priority Colors with softer, pastel-like backgrounds */
+    --priority-low: #f1f5f9;
+    --priority-low-foreground: #64748b;
+    --priority-medium: #fef3c7;
+    --priority-medium-foreground: #b45309;
+    --priority-high: #fee2e2;
+    --priority-high-foreground: #ef4444;
+  }
+}

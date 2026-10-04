@@ -1,92 +1,77 @@
-import { Ionicons } from "@expo/vector-icons";
-import { StyleSheet, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useEffect } from "react";
+import { useGroceryStore } from "@/store/grocery-store";
+import { Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Animated, { FadeInDown, Layout } from "react-native-reanimated";
 
-export default function HomeScreen() {
+import PendingItemCard from "../../components/list/PendingItemCard";
+import CompletedItems from "../../components/list/CompletedItems";
+import ListHeroCard from "../../components/list/ListHeroCard";
+import TabScreenBackground from "../../components/TabScreenBackground";
+
+export default function ListScreen() {
+  const { items, loadItems, isLoading } = useGroceryStore();
+  const insets = useSafeAreaInsets();
+
+  useEffect(() => {
+    loadItems();
+  }, []);
+
+  const pendingItems = items.filter((item) => !item.purchased);
+
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Home</Text>
-          <Text style={styles.subtitle}>
-            Your active grocery lists and items
-          </Text>
-        </View>
+    <View className="flex-1 bg-background">
+      {/* Fixed background bubbles */}
+      <TabScreenBackground />
 
-        <View style={styles.emptyCard}>
-          <View style={styles.iconSquircle}>
-            <Ionicons name="cart-outline" size={32} color="#059669" />
-          </View>
-          <Text style={styles.emptyTitle}>Grocery List Ready</Text>
-          <Text style={styles.emptySubtitle}>
-            Your grocery checklist is up to date. Start adding items when
-            planning your next shopping trip.
-          </Text>
-        </View>
-      </View>
-    </SafeAreaView>
+      <Animated.FlatList
+        className="flex-1"
+        data={pendingItems}
+        keyExtractor={(item) => item.id}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ 
+          padding: 20, 
+          paddingTop: insets.top + 20,
+          gap: 14 
+        }}
+        itemLayoutAnimation={Layout.springify()}
+        renderItem={({ item, index }) => (
+          <Animated.View entering={FadeInDown.delay(index * 50).springify()}>
+            <PendingItemCard item={item} />
+          </Animated.View>
+        )}
+        ListHeaderComponent={
+          <Animated.View entering={FadeInDown.springify()} style={{ gap: 16, paddingBottom: 10 }}>
+            <ListHeroCard />
+            
+            <View className="flex-row items-end justify-between px-2 pt-4">
+              <Text className="text-sm font-bold uppercase tracking-wider text-muted-foreground/80">
+                Shopping items
+              </Text>
+              <View className="rounded-full bg-secondary/50 px-3 py-1">
+                <Text className="text-xs font-semibold text-secondary-foreground">
+                  {pendingItems.length} active
+                </Text>
+              </View>
+            </View>
+          </Animated.View>
+        }
+        ListEmptyComponent={
+          !isLoading ? (
+            <Animated.View entering={FadeInDown.delay(200)} className="mt-8 items-center justify-center p-6 opacity-60">
+              <Text className="text-lg font-bold text-muted-foreground">All caught up!</Text>
+              <Text className="mt-2 text-center text-sm text-muted-foreground">
+                Your grocery board is clear. Time to relax or add some new items.
+              </Text>
+            </Animated.View>
+          ) : null
+        }
+        ListFooterComponent={
+          <Animated.View layout={Layout.springify()}>
+            <CompletedItems />
+          </Animated.View>
+        }
+      />
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#f8fafc",
-  },
-  container: {
-    flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 16,
-  },
-  header: {
-    marginBottom: 24,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "800",
-    color: "#0f172a",
-    letterSpacing: -0.6,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: "#64748b",
-    marginTop: 4,
-  },
-  emptyCard: {
-    backgroundColor: "#ffffff",
-    borderRadius: 22,
-    padding: 32,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "#e2e8f0",
-    shadowColor: "#0f172a",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.03,
-    shadowRadius: 6,
-    elevation: 1,
-    marginTop: 16,
-  },
-  iconSquircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 20,
-    backgroundColor: "#ecfdf5",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 16,
-  },
-  emptyTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#0f172a",
-    marginBottom: 8,
-  },
-  emptySubtitle: {
-    fontSize: 14,
-    color: "#64748b",
-    textAlign: "center",
-    lineHeight: 20,
-    paddingHorizontal: 12,
-  },
-});

@@ -1,5 +1,4 @@
 import { Ionicons } from "@expo/vector-icons";
-import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -9,7 +8,9 @@ export default function HomeScreen() {
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.title}>Home</Text>
-          <Text style={styles.subtitle}>Your active grocery lists and items</Text>
+          <Text style={styles.subtitle}>
+            Your active grocery lists and items
+          </Text>
         </View>
 
         <View style={styles.emptyCard}>
@@ -18,7 +19,8 @@ export default function HomeScreen() {
           </View>
           <Text style={styles.emptyTitle}>Grocery List Ready</Text>
           <Text style={styles.emptySubtitle}>
-            Your grocery checklist is up to date. Start adding items when planning your next shopping trip.
+            Your grocery checklist is up to date. Start adding items when
+            planning your next shopping trip.
           </Text>
         </View>
       </View>

@@ -10,13 +10,13 @@ import {
   Platform,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useColorScheme } from "nativewind";
 
 export default function ProfileScreen() {
   const { isLoaded: isAuthLoaded, isSignedIn } = useAuth();
@@ -24,26 +24,26 @@ export default function ProfileScreen() {
 
   if (!isAuthLoaded || !isUserLoaded) {
     return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#059669" />
+      <View className="flex-1 items-center justify-center bg-background">
+        <ActivityIndicator size="large" color="#10b981" />
       </View>
     );
   }
 
   if (!isSignedIn || !user) {
     return (
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.notSignedInContainer}>
-          <View style={styles.warningIconCircle}>
+      <SafeAreaView className="flex-1 bg-background">
+        <View className="flex-1 items-center justify-center px-6 gap-3">
+          <View className="w-16 h-16 rounded-full bg-red-100 items-center justify-center mb-2">
             <Ionicons name="lock-closed" size={32} color="#dc2626" />
           </View>
-          <Text style={styles.notSignedInTitle}>Session Expired</Text>
-          <Text style={styles.notSignedInSubtitle}>
+          <Text className="text-2xl font-extrabold text-foreground">Session Expired</Text>
+          <Text className="text-sm text-muted-foreground text-center mb-4">
             Please sign in to access your profile settings.
           </Text>
           <Link href={"/sign-in" as Href} asChild>
-            <TouchableOpacity style={styles.primaryButton}>
-              <Text style={styles.primaryButtonText}>Go to Log In</Text>
+            <TouchableOpacity className="bg-primary h-12 px-6 rounded-2xl items-center justify-center shadow-sm">
+              <Text className="text-white text-[15px] font-bold">Go to Log In</Text>
             </TouchableOpacity>
           </Link>
         </View>
@@ -66,24 +66,20 @@ function ProfileContent({
 }) {
   const { signOut } = useAuth();
   const router = useRouter();
+  const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === "dark";
 
   // Personal info state
   const [firstName, setFirstName] = useState(user.firstName ?? "");
   const [lastName, setLastName] = useState(user.lastName ?? "");
   const [isSavingName, setIsSavingName] = useState(false);
-  const [nameSuccessMessage, setNameSuccessMessage] = useState<string | null>(
-    null
-  );
+  const [nameSuccessMessage, setNameSuccessMessage] = useState<string | null>(null);
   const [nameErrorMessage, setNameErrorMessage] = useState<string | null>(null);
 
   // Profile image state
   const [isUploadingImage, setIsUploadingImage] = useState(false);
-  const [imageSuccessMessage, setImageSuccessMessage] = useState<string | null>(
-    null
-  );
-  const [imageErrorMessage, setImageErrorMessage] = useState<string | null>(
-    null
-  );
+  const [imageSuccessMessage, setImageSuccessMessage] = useState<string | null>(null);
+  const [imageErrorMessage, setImageErrorMessage] = useState<string | null>(null);
 
   // Password reset/update state
   const [currentPassword, setCurrentPassword] = useState("");
@@ -93,12 +89,8 @@ function ProfileContent({
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
-  const [passwordSuccessMessage, setPasswordSuccessMessage] = useState<
-    string | null
-  >(null);
-  const [passwordErrorMessage, setPasswordErrorMessage] = useState<
-    string | null
-  >(null);
+  const [passwordSuccessMessage, setPasswordSuccessMessage] = useState<string | null>(null);
+  const [passwordErrorMessage, setPasswordErrorMessage] = useState<string | null>(null);
 
   // Sign out state
   const [isSigningOut, setIsSigningOut] = useState(false);
@@ -109,13 +101,10 @@ function ProfileContent({
     setImageErrorMessage(null);
 
     try {
-      const permissionResult =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
       if (!permissionResult.granted) {
-        setImageErrorMessage(
-          "Permission to access your photos is required to change your profile picture."
-        );
+        setImageErrorMessage("Permission to access your photos is required to change your profile picture.");
         return;
       }
 
@@ -144,11 +133,7 @@ function ProfileContent({
       setImageSuccessMessage("Profile photo updated successfully!");
     } catch (err: unknown) {
       console.error("Error setting profile image:", err);
-      const msg =
-        err instanceof Error
-          ? err.message
-          : "Failed to update profile image. Please try again.";
-      setImageErrorMessage(msg);
+      setImageErrorMessage(err instanceof Error ? err.message : "Failed to update profile image. Please try again.");
     } finally {
       setIsUploadingImage(false);
     }
@@ -166,11 +151,7 @@ function ProfileContent({
       setImageSuccessMessage("Profile photo removed.");
     } catch (err: unknown) {
       console.error("Error removing profile image:", err);
-      const msg =
-        err instanceof Error
-          ? err.message
-          : "Failed to remove profile image.";
-      setImageErrorMessage(msg);
+      setImageErrorMessage(err instanceof Error ? err.message : "Failed to remove profile image.");
     } finally {
       setIsUploadingImage(false);
     }
@@ -196,11 +177,7 @@ function ProfileContent({
       setNameSuccessMessage("Your profile name has been updated!");
     } catch (err: unknown) {
       console.error("Error updating name:", err);
-      const msg =
-        err instanceof Error
-          ? err.message
-          : "Failed to update name. Please check your connection.";
-      setNameErrorMessage(msg);
+      setNameErrorMessage(err instanceof Error ? err.message : "Failed to update name. Please check your connection.");
     } finally {
       setIsSavingName(false);
     }
@@ -222,9 +199,7 @@ function ProfileContent({
     }
 
     if (newPassword.length < 8) {
-      setPasswordErrorMessage(
-        "New password must be at least 8 characters long."
-      );
+      setPasswordErrorMessage("New password must be at least 8 characters long.");
       return;
     }
 
@@ -259,11 +234,7 @@ function ProfileContent({
       );
     } catch (err: unknown) {
       console.error("Error updating password:", err);
-      const msg =
-        err instanceof Error
-          ? err.message
-          : "Failed to update password. Please check your credentials.";
-      setPasswordErrorMessage(msg);
+      setPasswordErrorMessage(err instanceof Error ? err.message : "Failed to update password. Please check your credentials.");
     } finally {
       setIsUpdatingPassword(false);
     }
@@ -297,15 +268,15 @@ function ProfileContent({
     "U";
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView className="flex-1 bg-background">
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.keyboardView}
+        style={{ flex: 1 }}
       >
         {/* Modern Top Header */}
-        <View style={styles.topBar}>
+        <View className="flex-row items-center justify-between px-4 py-2.5 border-b border-border bg-card">
           <Pressable
-            style={styles.backButton}
+            className="flex-row items-center gap-1 py-1.5 px-2.5 rounded-full bg-emerald-50 dark:bg-emerald-950/30"
             hitSlop={12}
             onPress={() => {
               if (router.canGoBack()) {
@@ -315,37 +286,35 @@ function ProfileContent({
               }
             }}
           >
-            <Ionicons name="chevron-back" size={20} color="#059669" />
-            <Text style={styles.backButtonText}>Back</Text>
+            <Ionicons name="chevron-back" size={20} color="#10b981" />
+            <Text className="text-primary text-sm font-bold">Back</Text>
           </Pressable>
-          <Text style={styles.pageTitle}>Edit Profile</Text>
-          <View style={styles.headerRightPlaceholder} />
+          <Text className="text-[17px] font-bold text-foreground">Edit Profile</Text>
+          <View className="w-16" />
         </View>
 
         <ScrollView
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 16, paddingBottom: 48, gap: 16 }}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
           {/* Hero Profile Photo Section */}
-          <View style={styles.heroCard}>
-            <View style={styles.avatarContainer}>
-              <View style={styles.avatarRing}>
+          <View className="items-center bg-card rounded-[24px] py-6 px-5 border border-border shadow-sm">
+            <View className="relative mb-3">
+              <View className="w-24 h-24 rounded-full overflow-hidden bg-accent border-[3px] border-primary items-center justify-center">
                 {user.imageUrl ? (
                   <Image
                     source={{ uri: user.imageUrl }}
-                    style={styles.avatarImage}
+                    style={{ width: '100%', height: '100%' }}
                     contentFit="cover"
                     transition={200}
                   />
                 ) : (
-                  <View style={styles.avatarFallback}>
-                    <Text style={styles.avatarInitials}>{userInitials}</Text>
-                  </View>
+                  <Text className="text-[32px] font-extrabold text-primary">{userInitials}</Text>
                 )}
 
                 {isUploadingImage && (
-                  <View style={styles.avatarLoadingOverlay}>
+                  <View className="absolute inset-0 bg-slate-900/50 items-center justify-center">
                     <ActivityIndicator color="#ffffff" size="small" />
                   </View>
                 )}
@@ -353,80 +322,78 @@ function ProfileContent({
 
               {/* Floating Camera Button */}
               <TouchableOpacity
-                style={styles.cameraBadge}
+                className="absolute bottom-0 right-0 bg-primary w-8 h-8 rounded-full items-center justify-center border-[2.5px] border-card shadow-sm"
                 onPress={handlePickImage}
                 disabled={isUploadingImage}
                 activeOpacity={0.8}
               >
-                <Ionicons name="camera" size={16} color="#ffffff" />
+                <Ionicons name="camera" size={14} color="#ffffff" />
               </TouchableOpacity>
             </View>
 
-            <Text style={styles.heroName}>{displayName}</Text>
-            <View style={styles.heroBadgeRow}>
-              <View style={styles.statusPill}>
-                <Ionicons name="checkmark-circle" size={13} color="#059669" />
-                <Text style={styles.statusPillText}>Active Account</Text>
-              </View>
+            <Text className="text-xl font-extrabold text-foreground tracking-tight">{displayName}</Text>
+            <View className="mt-1.5 flex-row items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/30 px-3 py-1 rounded-full">
+              <Ionicons name="checkmark-circle" size={13} color="#10b981" />
+              <Text className="text-xs font-bold text-primary">Active Account</Text>
             </View>
 
             {user.hasImage && (
               <TouchableOpacity
-                style={styles.removePhotoBtn}
+                className="mt-3 py-1"
                 onPress={handleRemoveImage}
                 disabled={isUploadingImage}
               >
-                <Text style={styles.removePhotoText}>Remove photo</Text>
+                <Text className="text-[13px] font-semibold text-red-500">Remove photo</Text>
               </TouchableOpacity>
             )}
 
             {imageSuccessMessage && (
-              <View style={styles.bannerSuccess}>
-                <Ionicons name="checkmark-circle-outline" size={16} color="#047857" />
-                <Text style={styles.bannerSuccessText}>{imageSuccessMessage}</Text>
+              <View className="flex-row items-center gap-2 bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 rounded-xl py-2.5 px-3 mt-4 w-full">
+                <Ionicons name="checkmark-circle-outline" size={16} color="#10b981" />
+                <Text className="flex-1 text-primary text-[13px] font-semibold">{imageSuccessMessage}</Text>
               </View>
             )}
 
             {imageErrorMessage && (
-              <View style={styles.bannerError}>
-                <Ionicons name="alert-circle-outline" size={16} color="#b91c1c" />
-                <Text style={styles.bannerErrorText}>{imageErrorMessage}</Text>
+              <View className="flex-row items-center gap-2 bg-red-50/80 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-xl py-2.5 px-3 mt-4 w-full">
+                <Ionicons name="alert-circle-outline" size={16} color="#ef4444" />
+                <Text className="flex-1 text-red-600 dark:text-red-400 text-[13px] font-medium">{imageErrorMessage}</Text>
               </View>
             )}
           </View>
 
           {/* 1. Personal Information Card */}
-          <View style={styles.card}>
-            <View style={styles.cardHeaderRow}>
-              <View style={[styles.iconSquircle, { backgroundColor: "#ecfdf5" }]}>
-                <Ionicons name="person-outline" size={20} color="#059669" />
+          <View className="bg-card rounded-[22px] p-[18px] border border-border shadow-sm gap-3.5">
+            <View className="flex-row items-center gap-3">
+              <View className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 items-center justify-center">
+                <Ionicons name="person-outline" size={20} color="#10b981" />
               </View>
-              <View style={styles.cardHeaderTexts}>
-                <Text style={styles.cardTitle}>Personal Information</Text>
-                <Text style={styles.cardSubtitle}>Your public display name</Text>
+              <View className="flex-1">
+                <Text className="text-base font-bold text-foreground">Personal Information</Text>
+                <Text className="text-xs text-muted-foreground mt-0.5">Your public display name</Text>
               </View>
             </View>
 
             {nameSuccessMessage && (
-              <View style={styles.bannerSuccess}>
-                <Ionicons name="checkmark-circle-outline" size={16} color="#047857" />
-                <Text style={styles.bannerSuccessText}>{nameSuccessMessage}</Text>
+              <View className="flex-row items-center gap-2 bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 rounded-xl py-2.5 px-3">
+                <Ionicons name="checkmark-circle-outline" size={16} color="#10b981" />
+                <Text className="flex-1 text-primary text-[13px] font-semibold">{nameSuccessMessage}</Text>
               </View>
             )}
 
             {nameErrorMessage && (
-              <View style={styles.bannerError}>
-                <Ionicons name="alert-circle-outline" size={16} color="#b91c1c" />
-                <Text style={styles.bannerErrorText}>{nameErrorMessage}</Text>
+              <View className="flex-row items-center gap-2 bg-red-50/80 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-xl py-2.5 px-3">
+                <Ionicons name="alert-circle-outline" size={16} color="#ef4444" />
+                <Text className="flex-1 text-red-600 dark:text-red-400 text-[13px] font-medium">{nameErrorMessage}</Text>
               </View>
             )}
 
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>First Name</Text>
-              <View style={styles.inputWrapper}>
-                <Ionicons name="person-outline" size={18} color="#94a3b8" />
+            <View className="gap-1.5 mt-1">
+              <Text className="text-[13px] font-semibold text-card-foreground">First Name</Text>
+              <View className="flex-row items-center gap-2.5 bg-secondary border border-border rounded-2xl px-3.5 h-12">
+                <Ionicons name="person-outline" size={18} color={isDark ? "#64748b" : "#94a3b8"} />
                 <TextInput
-                  style={styles.textInputField}
+                  className="flex-1 text-sm text-foreground h-full"
                   placeholder="Enter first name"
                   placeholderTextColor="#94a3b8"
                   value={firstName}
@@ -439,12 +406,12 @@ function ProfileContent({
               </View>
             </View>
 
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Last Name</Text>
-              <View style={styles.inputWrapper}>
-                <Ionicons name="person-outline" size={18} color="#94a3b8" />
+            <View className="gap-1.5">
+              <Text className="text-[13px] font-semibold text-card-foreground">Last Name</Text>
+              <View className="flex-row items-center gap-2.5 bg-secondary border border-border rounded-2xl px-3.5 h-12">
+                <Ionicons name="person-outline" size={18} color={isDark ? "#64748b" : "#94a3b8"} />
                 <TextInput
-                  style={styles.textInputField}
+                  className="flex-1 text-sm text-foreground h-full"
                   placeholder="Enter last name"
                   placeholderTextColor="#94a3b8"
                   value={lastName}
@@ -458,75 +425,64 @@ function ProfileContent({
             </View>
 
             <TouchableOpacity
-              style={[styles.primaryButton, isSavingName && styles.buttonDisabled]}
+              className={`bg-primary h-12 rounded-2xl items-center justify-center mt-2 shadow-sm ${isSavingName ? 'opacity-65' : ''}`}
               onPress={handleUpdateName}
               disabled={isSavingName}
               activeOpacity={0.85}
             >
               {isSavingName ? (
-                <View style={styles.buttonLoadingContent}>
+                <View className="flex-row items-center gap-2">
                   <ActivityIndicator color="#ffffff" size="small" />
-                  <Text style={styles.primaryButtonText}>Saving Changes...</Text>
+                  <Text className="text-white text-[15px] font-bold">Saving Changes...</Text>
                 </View>
               ) : (
-                <Text style={styles.primaryButtonText}>Save Changes</Text>
+                <Text className="text-white text-[15px] font-bold">Save Changes</Text>
               )}
             </TouchableOpacity>
           </View>
 
           {/* 2. Password & Security Card */}
-          <View style={styles.card}>
-            <View style={styles.cardHeaderRow}>
-              <View style={[styles.iconSquircle, { backgroundColor: "#fef3c7" }]}>
+          <View className="bg-card rounded-[22px] p-[18px] border border-border shadow-sm gap-3.5">
+            <View className="flex-row items-center gap-3">
+              <View className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/40 items-center justify-center">
                 <Ionicons name="shield-checkmark-outline" size={20} color="#d97706" />
               </View>
-              <View style={styles.cardHeaderTexts}>
-                <Text style={styles.cardTitle}>Password & Security</Text>
-                <Text style={styles.cardSubtitle}>
+              <View className="flex-1">
+                <Text className="text-base font-bold text-foreground">Password & Security</Text>
+                <Text className="text-xs text-muted-foreground mt-0.5">
                   {user.passwordEnabled
                     ? "Update your existing account password"
                     : "Create password for direct email sign-in"}
                 </Text>
               </View>
-              <View
-                style={[
-                  styles.badgePill,
-                  user.passwordEnabled ? styles.badgeSuccess : styles.badgeInfo,
-                ]}
-              >
-                <Text
-                  style={
-                    user.passwordEnabled
-                      ? styles.badgeSuccessText
-                      : styles.badgeInfoText
-                  }
-                >
+              <View className={`px-2 py-1 rounded-xl ${user.passwordEnabled ? 'bg-emerald-50 dark:bg-emerald-950/40' : 'bg-slate-100 dark:bg-slate-800'}`}>
+                <Text className={`text-[11px] font-bold ${user.passwordEnabled ? 'text-primary' : 'text-slate-500 dark:text-slate-400'}`}>
                   {user.passwordEnabled ? "Active" : "OAuth"}
                 </Text>
               </View>
             </View>
 
             {passwordSuccessMessage && (
-              <View style={styles.bannerSuccess}>
-                <Ionicons name="checkmark-circle-outline" size={16} color="#047857" />
-                <Text style={styles.bannerSuccessText}>{passwordSuccessMessage}</Text>
+              <View className="flex-row items-center gap-2 bg-emerald-50/80 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 rounded-xl py-2.5 px-3">
+                <Ionicons name="checkmark-circle-outline" size={16} color="#10b981" />
+                <Text className="flex-1 text-primary text-[13px] font-semibold">{passwordSuccessMessage}</Text>
               </View>
             )}
 
             {passwordErrorMessage && (
-              <View style={styles.bannerError}>
-                <Ionicons name="alert-circle-outline" size={16} color="#b91c1c" />
-                <Text style={styles.bannerErrorText}>{passwordErrorMessage}</Text>
+              <View className="flex-row items-center gap-2 bg-red-50/80 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-xl py-2.5 px-3">
+                <Ionicons name="alert-circle-outline" size={16} color="#ef4444" />
+                <Text className="flex-1 text-red-600 dark:text-red-400 text-[13px] font-medium">{passwordErrorMessage}</Text>
               </View>
             )}
 
             {user.passwordEnabled && (
-              <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Current Password</Text>
-                <View style={styles.inputWrapper}>
-                  <Ionicons name="lock-closed-outline" size={18} color="#94a3b8" />
+              <View className="gap-1.5 mt-1">
+                <Text className="text-[13px] font-semibold text-card-foreground">Current Password</Text>
+                <View className="flex-row items-center gap-2.5 bg-secondary border border-border rounded-2xl px-3.5 h-12">
+                  <Ionicons name="lock-closed-outline" size={18} color={isDark ? "#64748b" : "#94a3b8"} />
                   <TextInput
-                    style={styles.textInputField}
+                    className="flex-1 text-sm text-foreground h-full"
                     placeholder="Enter current password"
                     placeholderTextColor="#94a3b8"
                     secureTextEntry={!showCurrentPassword}
@@ -537,28 +493,21 @@ function ProfileContent({
                       setPasswordErrorMessage(null);
                     }}
                   />
-                  <Pressable
-                    onPress={() => setShowCurrentPassword((prev) => !prev)}
-                    hitSlop={8}
-                  >
-                    <Ionicons
-                      name={showCurrentPassword ? "eye-off-outline" : "eye-outline"}
-                      size={20}
-                      color="#64748b"
-                    />
+                  <Pressable onPress={() => setShowCurrentPassword((prev) => !prev)} hitSlop={8}>
+                    <Ionicons name={showCurrentPassword ? "eye-off-outline" : "eye-outline"} size={20} color={isDark ? "#94a3b8" : "#64748b"} />
                   </Pressable>
                 </View>
               </View>
             )}
 
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>
+            <View className="gap-1.5">
+              <Text className="text-[13px] font-semibold text-card-foreground">
                 {user.passwordEnabled ? "New Password" : "Create Password"}
               </Text>
-              <View style={styles.inputWrapper}>
-                <Ionicons name="key-outline" size={18} color="#94a3b8" />
+              <View className="flex-row items-center gap-2.5 bg-secondary border border-border rounded-2xl px-3.5 h-12">
+                <Ionicons name="key-outline" size={18} color={isDark ? "#64748b" : "#94a3b8"} />
                 <TextInput
-                  style={styles.textInputField}
+                  className="flex-1 text-sm text-foreground h-full"
                   placeholder="Min 8 characters"
                   placeholderTextColor="#94a3b8"
                   secureTextEntry={!showNewPassword}
@@ -569,25 +518,18 @@ function ProfileContent({
                     setPasswordErrorMessage(null);
                   }}
                 />
-                <Pressable
-                  onPress={() => setShowNewPassword((prev) => !prev)}
-                  hitSlop={8}
-                >
-                  <Ionicons
-                    name={showNewPassword ? "eye-off-outline" : "eye-outline"}
-                    size={20}
-                    color="#64748b"
-                  />
+                <Pressable onPress={() => setShowNewPassword((prev) => !prev)} hitSlop={8}>
+                  <Ionicons name={showNewPassword ? "eye-off-outline" : "eye-outline"} size={20} color={isDark ? "#94a3b8" : "#64748b"} />
                 </Pressable>
               </View>
             </View>
 
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Confirm New Password</Text>
-              <View style={styles.inputWrapper}>
-                <Ionicons name="key-outline" size={18} color="#94a3b8" />
+            <View className="gap-1.5">
+              <Text className="text-[13px] font-semibold text-card-foreground">Confirm New Password</Text>
+              <View className="flex-row items-center gap-2.5 bg-secondary border border-border rounded-2xl px-3.5 h-12">
+                <Ionicons name="key-outline" size={18} color={isDark ? "#64748b" : "#94a3b8"} />
                 <TextInput
-                  style={styles.textInputField}
+                  className="flex-1 text-sm text-foreground h-full"
                   placeholder="Re-enter new password"
                   placeholderTextColor="#94a3b8"
                   secureTextEntry={!showConfirmPassword}
@@ -598,35 +540,25 @@ function ProfileContent({
                     setPasswordErrorMessage(null);
                   }}
                 />
-                <Pressable
-                  onPress={() => setShowConfirmPassword((prev) => !prev)}
-                  hitSlop={8}
-                >
-                  <Ionicons
-                    name={showConfirmPassword ? "eye-off-outline" : "eye-outline"}
-                    size={20}
-                    color="#64748b"
-                  />
+                <Pressable onPress={() => setShowConfirmPassword((prev) => !prev)} hitSlop={8}>
+                  <Ionicons name={showConfirmPassword ? "eye-off-outline" : "eye-outline"} size={20} color={isDark ? "#94a3b8" : "#64748b"} />
                 </Pressable>
               </View>
             </View>
 
             <TouchableOpacity
-              style={[
-                styles.primaryButton,
-                isUpdatingPassword && styles.buttonDisabled,
-              ]}
+              className={`bg-primary h-12 rounded-2xl items-center justify-center mt-2 shadow-sm ${isUpdatingPassword ? 'opacity-65' : ''}`}
               onPress={handleUpdatePassword}
               disabled={isUpdatingPassword}
               activeOpacity={0.85}
             >
               {isUpdatingPassword ? (
-                <View style={styles.buttonLoadingContent}>
+                <View className="flex-row items-center gap-2">
                   <ActivityIndicator color="#ffffff" size="small" />
-                  <Text style={styles.primaryButtonText}>Updating...</Text>
+                  <Text className="text-white text-[15px] font-bold">Updating...</Text>
                 </View>
               ) : (
-                <Text style={styles.primaryButtonText}>
+                <Text className="text-white text-[15px] font-bold">
                   {user.passwordEnabled ? "Update Password" : "Set Password"}
                 </Text>
               )}
@@ -634,67 +566,55 @@ function ProfileContent({
           </View>
 
           {/* 3. Account & Connected Logins Card */}
-          <View style={styles.card}>
-            <View style={styles.cardHeaderRow}>
-              <View style={[styles.iconSquircle, { backgroundColor: "#e0f2fe" }]}>
-                <Ionicons name="finger-print-outline" size={20} color="#0284c7" />
+          <View className="bg-card rounded-[22px] p-[18px] border border-border shadow-sm gap-3.5">
+            <View className="flex-row items-center gap-3">
+              <View className="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-950/40 items-center justify-center">
+                <Ionicons name="finger-print-outline" size={20} color="#0ea5e9" />
               </View>
-              <View style={styles.cardHeaderTexts}>
-                <Text style={styles.cardTitle}>Account Details</Text>
-                <Text style={styles.cardSubtitle}>Email & authentication</Text>
+              <View className="flex-1">
+                <Text className="text-base font-bold text-foreground">Account Details</Text>
+                <Text className="text-xs text-muted-foreground mt-0.5">Email & authentication</Text>
               </View>
             </View>
 
-            <View style={styles.infoRow}>
-              <View style={styles.infoRowLeft}>
-                <Ionicons name="mail-outline" size={18} color="#64748b" />
+            <View className="flex-row items-center justify-between bg-secondary rounded-2xl p-3 border border-border">
+              <View className="flex-row items-center gap-2.5 flex-1">
+                <Ionicons name="mail-outline" size={18} color={isDark ? "#64748b" : "#94a3b8"} />
                 <View>
-                  <Text style={styles.infoRowLabel}>Email Address</Text>
-                  <Text style={styles.infoRowValue}>{primaryEmail}</Text>
+                  <Text className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider">Email Address</Text>
+                  <Text className="text-sm text-foreground font-semibold mt-0.5">{primaryEmail}</Text>
                 </View>
               </View>
-              <View style={styles.verifiedChip}>
-                <Ionicons name="checkmark-circle" size={13} color="#059669" />
-                <Text style={styles.verifiedChipText}>Verified</Text>
+              <View className="flex-row items-center gap-1 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-1 rounded-xl">
+                <Ionicons name="checkmark-circle" size={13} color="#10b981" />
+                <Text className="text-[11px] font-bold text-primary">Verified</Text>
               </View>
             </View>
 
             {user.externalAccounts && user.externalAccounts.length > 0 && (
-              <View style={styles.socialAccountsBox}>
-                <Text style={styles.infoRowLabel}>Connected Social Logins</Text>
-                <View style={styles.providersWrap}>
+              <View className="gap-2">
+                <Text className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider">Connected Social Logins</Text>
+                <View className="flex-row flex-wrap gap-2">
                   {user.externalAccounts.map((account) => {
                     const providerName =
-                      account.provider === "google"
-                        ? "Google"
-                        : account.provider === "github"
-                        ? "GitHub"
-                        : account.provider === "facebook"
-                        ? "Facebook"
-                        : account.provider;
+                      account.provider === "google" ? "Google"
+                        : account.provider === "github" ? "GitHub"
+                          : account.provider === "facebook" ? "Facebook" : account.provider;
 
                     const iconName =
-                      account.provider === "google"
-                        ? "logo-google"
-                        : account.provider === "github"
-                        ? "logo-github"
-                        : "logo-facebook";
+                      account.provider === "google" ? "logo-google"
+                        : account.provider === "github" ? "logo-github"
+                          : "logo-facebook";
 
                     const iconColor =
-                      account.provider === "google"
-                        ? "#ea4335"
-                        : account.provider === "github"
-                        ? "#1e293b"
-                        : "#1877f2";
+                      account.provider === "google" ? "#ea4335"
+                        : account.provider === "github" ? (isDark ? "#ffffff" : "#1e293b")
+                          : "#1877f2";
 
                     return (
-                      <View key={account.id} style={styles.providerChip}>
-                        <Ionicons
-                          name={iconName as any}
-                          size={14}
-                          color={iconColor}
-                        />
-                        <Text style={styles.providerChipText}>{providerName}</Text>
+                      <View key={account.id} className="flex-row items-center gap-1.5 bg-secondary border border-border py-1.5 px-2.5 rounded-xl">
+                        <Ionicons name={iconName as any} size={14} color={iconColor} />
+                        <Text className="text-xs font-semibold text-card-foreground">{providerName}</Text>
                       </View>
                     );
                   })}
@@ -702,24 +622,24 @@ function ProfileContent({
               </View>
             )}
 
-            <View style={styles.idFooter}>
-              <Text style={styles.idText}>User ID: {user.id}</Text>
+            <View className="pt-1">
+              <Text className="text-[11px] text-muted-foreground">User ID: {user.id}</Text>
             </View>
           </View>
 
           {/* 4. Sign Out Button */}
           <TouchableOpacity
-            style={[styles.signOutBtn, isSigningOut && styles.buttonDisabled]}
+            className={`bg-red-50/50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/50 h-14 rounded-2xl items-center justify-center mt-2 ${isSigningOut ? 'opacity-65' : ''}`}
             onPress={handleSignOut}
             disabled={isSigningOut}
             activeOpacity={0.8}
           >
             {isSigningOut ? (
-              <ActivityIndicator color="#dc2626" size="small" />
+              <ActivityIndicator color="#ef4444" size="small" />
             ) : (
-              <View style={styles.signOutBtnContent}>
-                <Ionicons name="log-out-outline" size={20} color="#dc2626" />
-                <Text style={styles.signOutBtnText}>Sign Out of Grocify</Text>
+              <View className="flex-row items-center gap-2">
+                <Ionicons name="log-out-outline" size={20} color="#ef4444" />
+                <Text className="text-red-500 text-[15px] font-bold">Sign Out of Grocify</Text>
               </View>
             )}
           </TouchableOpacity>
@@ -728,423 +648,3 @@ function ProfileContent({
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#f8fafc",
-  },
-  keyboardView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 48,
-    gap: 16,
-  },
-  centered: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#f8fafc",
-  },
-  notSignedInContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 24,
-    gap: 12,
-  },
-  warningIconCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: "#fee2e2",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 8,
-  },
-  notSignedInTitle: {
-    fontSize: 22,
-    fontWeight: "800",
-    color: "#0f172a",
-  },
-  notSignedInSubtitle: {
-    fontSize: 14,
-    color: "#64748b",
-    textAlign: "center",
-    marginBottom: 16,
-  },
-  topBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f1f5f9",
-    backgroundColor: "#ffffff",
-  },
-  backButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 2,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 20,
-    backgroundColor: "#ecfdf5",
-  },
-  backButtonText: {
-    color: "#059669",
-    fontSize: 14,
-    fontWeight: "700",
-  },
-  pageTitle: {
-    fontSize: 17,
-    fontWeight: "700",
-    color: "#0f172a",
-  },
-  headerRightPlaceholder: {
-    width: 64,
-  },
-  heroCard: {
-    alignItems: "center",
-    backgroundColor: "#ffffff",
-    borderRadius: 24,
-    paddingVertical: 24,
-    paddingHorizontal: 20,
-    borderWidth: 1,
-    borderColor: "#e2e8f0",
-    shadowColor: "#0f172a",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  avatarContainer: {
-    position: "relative",
-    marginBottom: 12,
-  },
-  avatarRing: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    overflow: "hidden",
-    backgroundColor: "#dcfce7",
-    borderWidth: 3,
-    borderColor: "#10b981",
-  },
-  avatarImage: {
-    width: "100%",
-    height: "100%",
-  },
-  avatarFallback: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  avatarInitials: {
-    fontSize: 32,
-    fontWeight: "800",
-    color: "#059669",
-  },
-  avatarLoadingOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(15, 23, 42, 0.5)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  cameraBadge: {
-    position: "absolute",
-    bottom: 0,
-    right: 0,
-    backgroundColor: "#059669",
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 2.5,
-    borderColor: "#ffffff",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 3,
-    elevation: 3,
-  },
-  heroName: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: "#0f172a",
-    letterSpacing: -0.3,
-  },
-  heroBadgeRow: {
-    marginTop: 6,
-  },
-  statusPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    backgroundColor: "#ecfdf5",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 20,
-  },
-  statusPillText: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#059669",
-  },
-  removePhotoBtn: {
-    marginTop: 10,
-    paddingVertical: 4,
-  },
-  removePhotoText: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#ef4444",
-  },
-  card: {
-    backgroundColor: "#ffffff",
-    borderRadius: 22,
-    padding: 18,
-    borderWidth: 1,
-    borderColor: "#e2e8f0",
-    shadowColor: "#0f172a",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 2,
-    gap: 14,
-  },
-  cardHeaderRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  iconSquircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  cardHeaderTexts: {
-    flex: 1,
-  },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#0f172a",
-  },
-  cardSubtitle: {
-    fontSize: 12,
-    color: "#64748b",
-    marginTop: 1,
-  },
-  badgePill: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 12,
-  },
-  badgeSuccess: {
-    backgroundColor: "#ecfdf5",
-  },
-  badgeSuccessText: {
-    fontSize: 11,
-    fontWeight: "700",
-    color: "#059669",
-  },
-  badgeInfo: {
-    backgroundColor: "#f1f5f9",
-  },
-  badgeInfoText: {
-    fontSize: 11,
-    fontWeight: "700",
-    color: "#475569",
-  },
-  inputContainer: {
-    gap: 6,
-  },
-  inputLabel: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#334155",
-  },
-  inputWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    backgroundColor: "#f8fafc",
-    borderWidth: 1,
-    borderColor: "#e2e8f0",
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    height: 48,
-  },
-  textInputField: {
-    flex: 1,
-    fontSize: 14,
-    color: "#0f172a",
-    height: "100%",
-  },
-  primaryButton: {
-    backgroundColor: "#059669",
-    height: 48,
-    borderRadius: 14,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 4,
-    shadowColor: "#059669",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  primaryButtonText: {
-    color: "#ffffff",
-    fontSize: 15,
-    fontWeight: "700",
-  },
-  buttonLoadingContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  buttonDisabled: {
-    opacity: 0.65,
-  },
-  bannerSuccess: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    backgroundColor: "#ecfdf5",
-    borderWidth: 1,
-    borderColor: "#a7f3d0",
-    borderRadius: 12,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-  },
-  bannerSuccessText: {
-    flex: 1,
-    color: "#047857",
-    fontSize: 13,
-    fontWeight: "600",
-  },
-  bannerError: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    backgroundColor: "#fef2f2",
-    borderWidth: 1,
-    borderColor: "#fecaca",
-    borderRadius: 12,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-  },
-  bannerErrorText: {
-    flex: 1,
-    color: "#b91c1c",
-    fontSize: 13,
-    fontWeight: "500",
-  },
-  infoRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "#f8fafc",
-    borderRadius: 14,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: "#e2e8f0",
-  },
-  infoRowLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    flex: 1,
-  },
-  infoRowLabel: {
-    fontSize: 11,
-    color: "#64748b",
-    fontWeight: "600",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  infoRowValue: {
-    fontSize: 14,
-    color: "#0f172a",
-    fontWeight: "600",
-    marginTop: 2,
-  },
-  verifiedChip: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    backgroundColor: "#ecfdf5",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  verifiedChipText: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#059669",
-  },
-  socialAccountsBox: {
-    gap: 8,
-  },
-  providersWrap: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  providerChip: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    backgroundColor: "#f8fafc",
-    borderWidth: 1,
-    borderColor: "#e2e8f0",
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 10,
-  },
-  providerChipText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#334155",
-  },
-  idFooter: {
-    paddingTop: 4,
-  },
-  idText: {
-    fontSize: 11,
-    color: "#94a3b8",
-  },
-  signOutBtn: {
-    backgroundColor: "#fef2f2",
-    borderWidth: 1,
-    borderColor: "#fee2e2",
-    height: 52,
-    borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 8,
-  },
-  signOutBtnContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  signOutBtnText: {
-    color: "#dc2626",
-    fontSize: 15,
-    fontWeight: "700",
-  },
-});

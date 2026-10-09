@@ -44,4 +44,32 @@
     --priority-high: #fee2e2;
     --priority-high-foreground: #ef4444;
   }
+  
+  .dark {
+    --background: #0f172a;
+    --foreground: #f8fafc;
+    --card: #1e293b;
+    --card-foreground: #f8fafc;
+    --popover: #1e293b;
+    --popover-foreground: #f8fafc;
+    --primary: #10b981;
+    --primary-foreground: #ffffff;
+    --secondary: #334155;
+    --secondary-foreground: #f8fafc;
+    --muted: #1e293b;
+    --muted-foreground: #94a3b8;
+    --accent: #064e3b;
+    --accent-foreground: #a7f3d0;
+    --destructive: #7f1d1d;
+    --destructive-foreground: #f8fafc;
+    --border: #334155;
+    --input: #334155;
+    --ring: #10b981;
+    --priority-low: #334155;
+    --priority-low-foreground: #94a3b8;
+    --priority-medium: #78350f;
+    --priority-medium-foreground: #fde68a;
+    --priority-high: #7f1d1d;
+    --priority-high-foreground: #fecaca;
+  }
 }

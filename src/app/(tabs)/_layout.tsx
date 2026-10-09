@@ -3,10 +3,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { Redirect, Tabs } from "expo-router";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useColorScheme } from "nativewind";
 
 export default function TabLayout() {
   const { isLoaded, isSignedIn } = useAuth();
   const insets = useSafeAreaInsets();
+  const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === "dark";
 
   if (!isLoaded) {
     return (
@@ -26,11 +29,11 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#059669",
-        tabBarInactiveTintColor: "#94a3b8",
+        tabBarActiveTintColor: isDark ? "#10b981" : "#059669",
+        tabBarInactiveTintColor: isDark ? "#64748b" : "#94a3b8",
         tabBarStyle: {
-          backgroundColor: "#ffffff",
-          borderTopColor: "#f1f5f9",
+          backgroundColor: isDark ? "#1e293b" : "#ffffff",
+          borderTopColor: isDark ? "#334155" : "#f1f5f9",
           borderTopWidth: 1,
           height: 56 + bottomPadding,
           paddingTop: 8,

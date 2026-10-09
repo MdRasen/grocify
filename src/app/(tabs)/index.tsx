@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { Text, View } from "react-native";
 import Animated, { FadeInDown, Layout } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useColorScheme } from "nativewind";
 
 import CompletedItems from "../../components/list/CompletedItems";
 import ListHeroCard from "../../components/list/ListHeroCard";
@@ -12,6 +13,8 @@ import TabScreenBackground from "../../components/TabScreenBackground";
 export default function ListScreen() {
   const { items, loadItems, isLoading } = useGroceryStore();
   const insets = useSafeAreaInsets();
+  const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === "dark";
 
   useEffect(() => {
     loadItems();
@@ -45,11 +48,11 @@ export default function ListScreen() {
             <ListHeroCard />
 
             <View className="flex-row items-end justify-between px-2 pt-4">
-              <Text className="text-sm font-bold uppercase tracking-wider text-muted-foreground/80">
+              <Text className="text-sm font-bold uppercase tracking-wider" style={{ color: isDark ? "#94a3b8" : "#64748b" }}>
                 Shopping items
               </Text>
-              <View className="rounded-full bg-secondary/50 px-3 py-1">
-                <Text className="text-xs font-semibold text-secondary-foreground">
+              <View className="rounded-full px-3 py-1" style={{ backgroundColor: isDark ? "#334155" : "#f1f5f9" }}>
+                <Text className="text-xs font-semibold" style={{ color: isDark ? "#f8fafc" : "#1e293b" }}>
                   {pendingItems.length} active
                 </Text>
               </View>
@@ -60,8 +63,8 @@ export default function ListScreen() {
           !isLoading ? (
             <Animated.View entering={FadeInDown.delay(200)} style={{ marginTop: 32, alignItems: 'center', justifyContent: 'center', padding: 24 }}>
               <View style={{ opacity: 0.6, alignItems: 'center' }}>
-                <Text className="text-lg font-bold text-muted-foreground">All caught up!</Text>
-                <Text className="mt-2 text-center text-sm text-muted-foreground">
+                <Text className="text-lg font-bold" style={{ color: isDark ? "#94a3b8" : "#64748b" }}>All caught up!</Text>
+                <Text className="mt-2 text-center text-sm" style={{ color: isDark ? "#94a3b8" : "#64748b" }}>
                   Your grocery board is clear. Time to relax or add some new items.
                 </Text>
               </View>
